@@ -1,0 +1,169 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodndeliv-rw-deployment
+  labels:
+    app: foodndeliv-rw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foodndeliv-rw
+  template:
+    metadata:
+      labels:
+        app: foodndeliv-rw
+    spec:
+      containers:
+      - name: foodndeliv-rw-app
+        image: eliotp/foodndeliv-rw:latest 
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://foodndeliv-postgres-cluster-rw:5432/foodndeliv"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: foodndeliv-db-secret
+              key: username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: foodndeliv-db-secret
+              key: password
+
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          failureThreshold: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodndeliv-rw-service
+spec:
+  selector:
+    app: foodndeliv-rw
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodndeliv-ro-deployment
+  labels:
+    app: foodndeliv-ro
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foodndeliv-ro
+  template:
+    metadata:
+      labels:
+        app: foodndeliv-ro
+    spec:
+      containers:
+      - name: foodndeliv-ro-app
+        image: eliotp/foodndeliv-ro:latest 
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+        
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://foodndeliv-postgres-cluster-ro:5432/foodndeliv"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: foodndeliv-db-secret
+              key: username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: foodndeliv-db-secret
+              key: password
+
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8081
+          failureThreshold: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodndeliv-ro-service
+spec:
+  selector:
+    app: foodndeliv-ro
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: foodndeliv-rw-deployment
+  name: foodndeliv-rw-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foodndeliv-rw-deployment
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: foodndeliv-rw-deployment
+    spec:
+      containers:
+      - image: docker.io/eliotp/foodndeliv-rw:latest
+        name: foodndeliv-rw
+        resources: {}
+status: {}

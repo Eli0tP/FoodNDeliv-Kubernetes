@@ -1,0 +1,18 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: foodndeliv-postgres-cluster
+  namespace: default
+spec:
+  # Request the creation of 2 instances (rw and)
+  instances: 2
+
+  # Configuration of the stockage for Minikube
+  storage:
+    size: 1Gi
+
+  # Automatic initialization of an empty database for the application
+  bootstrap:
+    initdb:
+      database: foodndeliv_db
+      owner: foodadmin

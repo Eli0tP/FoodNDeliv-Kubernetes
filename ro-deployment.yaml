@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: foodndeliv-ro
+  name: foodndeliv-ro-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foodndeliv-ro
+  template:
+    metadata:
+      labels:
+        app: foodndeliv-ro
+    spec:
+      containers:
+      - env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://foodndeliv-postgres-cluster-ro:5432/foodndeliv_db
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: foodndeliv-postgres-cluster-app
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: foodndeliv-postgres-cluster-app
+        - name: IAM_CLIENT_SECRET
+          value: "change-me"
+        - name: IAM_PASSWORD
+          value: "change-me"
+        - name: IAM_USERNAME
+          value: "admin"
+        - name: IAM_URL
+          value: "http://my-keycloak"
+        image: docker.io/eliotp/foodndeliv-ro:latest
+        imagePullPolicy: IfNotPresent
+        name: foodndeliv-ro-app
+        ports:
+        - containerPort: 8081

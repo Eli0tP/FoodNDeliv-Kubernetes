@@ -1,0 +1,7 @@
+target/
+*.jar
+*.zip
+.vscode/
+.idea/
+.github/
+token.txt

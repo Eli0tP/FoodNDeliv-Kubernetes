@@ -1,0 +1,41 @@
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodndeliv-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: krakend-gateway
+  template:
+    metadata:
+      labels:
+        app: krakend-gateway
+    spec:
+      containers:
+      - name: krakend
+        image: devopsfaith/krakend:2.6
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/krakend
+      volumes:
+      - name: config-volume
+        configMap:
+          name: krakend-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: krakend-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30080
+  selector:
+    app: krakend-gateway

@@ -1,0 +1,183 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "port": 8080,
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "name": "FoodNDeliv API Gateway",
+  "endpoints": [
+    {
+      "endpoint": "/auth/token",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "backend": [
+        {
+          "url_pattern": "/realms/foodndeliv/protocol/openid-connect/token",
+          "method": "POST",
+          "encoding": "no-op",
+          "host": [
+            "http://my-keycloak:80"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/auth/authorize",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "backend": [
+        {
+          "url_pattern": "/realms/foodndeliv/protocol/openid-connect/auth",
+          "method": "GET",
+          "encoding": "no-op",
+          "host": [
+            "http://my-keycloak:80"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/auth/logout",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "backend": [
+        {
+          "url_pattern": "/realms/foodndeliv/protocol/openid-connect/logout",
+          "method": "POST",
+          "encoding": "no-op",
+          "host": [
+            "http://my-keycloak:80"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/customers",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/v1/customers",
+          "method": "GET",
+          "host": [
+            "http://foodndeliv-ro-service:8081"
+          ]
+        }
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://my-keycloak/realms/foodndeliv/.well-known/jwks.json",
+          "roles_key": "realm_access.roles",
+          "roles": ["customer", "admin"]
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v1/customers",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/v1/customers",
+          "method": "POST",
+          "host": [
+            "http://foodndeliv-rw-service:8080"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/customers/{id}",
+      "method": "PUT",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/ctrl/customers/{id}",
+          "method": "PUT",
+          "host": [
+            "http://foodndeliv-rw-service:8080"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/restaurants",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/v1/restaurants",
+          "method": "POST",
+          "host": [
+            "http://foodndeliv-rw-service:8080"
+          ]
+        }
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://my-keycloak/realms/foodndeliv/.well-known/jwks.json",
+          "roles_key": "realm_access.roles",
+          "roles": ["admin"]
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v1/orders",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/ctrl/orders",
+          "method": "GET",
+          "host": [
+            "http://foodndeliv-ro-service:8081"
+          ]
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/v1/orders",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/v1/orders",
+          "method": "POST",
+          "host": [
+            "http://foodndeliv-rw-service:8080"
+          ]
+        }
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://my-keycloak/realms/foodndeliv/.well-known/jwks.json"
+        }
+      }
+    },
+    {
+      "endpoint": "/api/v1/admin/bulk-reset-passwords",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/api/v1/admin/bulk-reset-passwords",
+          "method": "POST",
+          "host": [
+            "http://foodndeliv-rw-service:8080"
+          ]
+        }
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://my-keycloak/realms/foodndeliv/.well-known/jwks.json",
+          "roles_key": "realm_access.roles",
+          "roles": ["admin"]
+        }
+      }
+    }
+  ]
+}
